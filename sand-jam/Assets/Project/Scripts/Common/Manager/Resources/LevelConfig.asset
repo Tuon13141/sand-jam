@@ -12,3 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0999b3a34bcc31f4294eac619905075b, type: 3}
   m_Name: LevelConfig
   m_EditorClassIdentifier: 
+  m_LevelDataFiles:
+  - {fileID: 4900000, guid: 822bfd3725d920a40b10533deae510f9, type: 3}
+  - {fileID: 4900000, guid: 5b32e7e66e7d6d44aa094c1ed7a65074, type: 3}
+  - {fileID: 4900000, guid: 6028fc81cf574cd4aa894b1314641ce9, type: 3}
+  - {fileID: 4900000, guid: 9235244f73cf5e94aa61f2f90e2d3bc2, type: 3}
+  - {fileID: 4900000, guid: 90e41ce214f211543b99bfa97b3a71e6, type: 3}
+  - {fileID: 4900000, guid: 8ecae436ccf581e4da6a4e2a47a8550d, type: 3}
+  - {fileID: 4900000, guid: 3a6fec23df35e2a428fbf748025c82a5, type: 3}
+  - {fileID: 4900000, guid: 9c850503d4ce8f44e84ce8aea7d11660, type: 3}
+  - {fileID: 4900000, guid: 2dc19d5f3b13f614ea1c1ef3be378f4c, type: 3}
+  - {fileID: 4900000, guid: 9421fa2bf3ff075419100725182d7c93, type: 3}
+  - {fileID: 4900000, guid: 467270c8c7208064a8b9689727aed3b9, type: 3}
+  - {fileID: 4900000, guid: 1bc11116e2ffd3f4aaa84d3469b7ad73, type: 3}
+  m_LevelTestDataFiles: []

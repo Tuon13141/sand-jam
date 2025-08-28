@@ -73,11 +73,6 @@ public static class Static
         return new Vector3(v2.x, v2.y, z);
     }
 
-    public static float3 ToFloat3(this Vector2Int v2, int z)
-    {
-        return new float3(v2.x, v2.y, z);
-    }
-
     public static Color ParseHtmlString(string text)
     {
         Color color = Color.white;

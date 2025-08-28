@@ -5,6 +5,12 @@ using Newtonsoft.Json;
 public class UserData
 {
     public List<int> collectionProcess;
+    public int CurrentLevel = 0;
+    public bool HadTutorial = false;
+    public bool SoundOn = true;
+    public bool MusicOn = true;
+    public bool VibrationOn = true;
+
 
     public int GetCollectionProcess(int index) //index start 0
     {
