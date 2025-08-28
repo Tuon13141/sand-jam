@@ -12,11 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d4b7240d07eecc43b04adcfabf04dea, type: 3}
   m_Name: PrefabManager
   m_EditorClassIdentifier: 
-  m_ShelfElement: {fileID: 5639345494104494142, guid: b3fe949496fab274c95429191c65225a, type: 3}
-  m_ShelfQueueElement: {fileID: 2437746111019869097, guid: fbd4722ff70520d40a1226622a535195, type: 3}
-  m_ShelfLockedElement: {fileID: 1323544557400746053, guid: b001a042346f3d9448dd8c46cae4b246, type: 3}
-  m_ItemElement: {fileID: 7573948790309356306, guid: a4cf75d4800dac44aa1149ebe8c96289, type: 3}
-  m_SlotElement: {fileID: 3638094888196869887, guid: bc8012cd88ef8e346910cbf37bcdf371, type: 3}
-  m_OrderElement: {fileID: 1122018157304853013, guid: 16aee00dd8237554c910c1812d8d67d4, type: 3}
-  m_ItemOrderElement: {fileID: 7956684415176168846, guid: 348cd3a8023fb464d80dc2878492833c, type: 3}
-  m_ItemMergeElement: {fileID: 2506265147495365078, guid: 088a06b80606e744a9e6b8e631296b1a, type: 3}
+  m_SpriteElement: {fileID: 7190549575130578062, guid: b63ff510ea1dade4e9231860c8c3b42f, type: 3}

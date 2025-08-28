@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -7,6 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PrefabManager", menuName = "ScriptableObjects/PrefabManager", order = 1)]
 public class PrefabManager : ScriptableObject
 {
+    [SerializeField, PoolingObject] private SpriteElement m_SpriteElement;
     public List<object> GetAllSerializeField()
     {
         Type type = this.GetType();
