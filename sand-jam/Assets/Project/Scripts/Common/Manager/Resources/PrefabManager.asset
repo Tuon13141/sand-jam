@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d4b7240d07eecc43b04adcfabf04dea, type: 3}
+  m_Name: PrefabManager
+  m_EditorClassIdentifier: 
+  m_CanvasTutorial: {fileID: 2838165116394743400, guid: 60bdae0ba2678ee4fa28d0930c4ab27b, type: 3}
+  m_BlockElements:
+  - {fileID: 1951508837536338761, guid: 9042f1aa916ff52498781b02b38042ac, type: 3}
+  - {fileID: 6010061389610311205, guid: 2fbef9017484c624ebe09a684cc29cda, type: 3}
+  - {fileID: 7704818118134008106, guid: 3c70db2c993f4794baeb56788b778a1b, type: 3}
+  - {fileID: 7704818118134008106, guid: a6df71f60f5ec5543b8d5ec10db4acf4, type: 3}
+  - {fileID: 2137743952047176648, guid: 12f944af9f464584590244e0785d27f0, type: 3}
+  - {fileID: 6724326797182200087, guid: 68e72d35b9aa30a43b88d78353db808b, type: 3}
+  - {fileID: 5398581540013705915, guid: d3384159a9cdc1a4a9dd3906e601dbb9, type: 3}
+  - {fileID: 7673225233787186729, guid: 857c9f9d0c160be4cb390edf2dca5b9e, type: 3}
+  - {fileID: 3482616961418181867, guid: ea55d57f8abdf4b4abe3cde171c25705, type: 3}
+  m_GridElement: {fileID: 4010565631826681453, guid: 92af7f07a1a6707498833a1a04f251f0, type: 3}
+  m_DoorElements:
+  - {fileID: 540668299172304426, guid: e4c8d73745666fa47987f9683430796e, type: 3}
+  - {fileID: 3414107746841004061, guid: 1281dcca06ec88a4798bab8a6b5cb2b6, type: 3}
+  - {fileID: 1453972100850229573, guid: 67348d7f9473ce8429c54373a8ea930a, type: 3}
+  m_WallElements:
+  - {fileID: 518934045039768677, guid: 5ac83cf1c7e46804bb1819cc6c71e603, type: 3}
+  - {fileID: 936863156637083220, guid: 6ea41c0e0f73ab34ebac2bf8ef53f3e9, type: 3}
+  - {fileID: 2784160231471118828, guid: 4dc847a3ef985154ca96107ed7542ac7, type: 3}
+  - {fileID: 1118324743116235343, guid: a9c8de77cb513be4b941bc48a1586b90, type: 3}
+  - {fileID: 4676450548373540400, guid: c240e498b456c0848bdb85d06afe2916, type: 3}
+  - {fileID: 936863156637083220, guid: c00730d8773090b46be3fd1e846c796e, type: 3}
+  m_PortalElements:
+  - {fileID: 8892361632650916649, guid: f1eccab4601dec0409cc670fb2a7f232, type: 3}
+  - {fileID: 8892361632650916649, guid: 750df37fba4023f4ba2a8dac6912328c, type: 3}
+  - {fileID: 8892361632650916649, guid: d3ae60bcf70c4964e8c45964c31b3821, type: 3}
+  m_BombElement: {fileID: 3818442928730333846, guid: a2d8fb13d87180b42b56197cdc0fcaf1, type: 3}
+  m_StickElement: {fileID: 7050171736965542344, guid: 438b16ae79bf3234baa5bb3141366302, type: 3}
+  m_KeyElement: {fileID: 2685907361666702752, guid: f7b6ef0ce71c47347bdba73f3133e501, type: 3}
+  m_LockElement: {fileID: 6776607228949816114, guid: 43f1e6d21ba830b4a85ad9278efccca9, type: 3}
+  m_BarrierElement: {fileID: 126797853347096051, guid: 23ed1cddc6d77b24bb3b7cb9549e4063, type: 3}
+  m_BarrierWall: {fileID: 5625680372749559525, guid: 291823fa8446a7942b6e4062b875300f, type: 3}

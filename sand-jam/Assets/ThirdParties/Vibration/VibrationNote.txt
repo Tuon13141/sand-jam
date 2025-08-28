@@ -1,0 +1,3 @@
+<uses-permission android:name="android.permission.VIBRATE" />
+
+(bên trong thẻ manifest, bên ngoài thẻ application)
