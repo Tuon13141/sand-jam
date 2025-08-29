@@ -1,5 +1,4 @@
-﻿
-using NaughtyAttributes;
+﻿using NaughtyAttributes;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -14,7 +13,9 @@ public class MapMakerEditor : MonoBehaviour
     [Tooltip("The 3D prefab to be scanned and converted to a 2D grid.")]
     public GameObject m_MapPrefab;
 
-    [SerializeField] Sprite m_SquareSprite;
+    [Header("Sprite Element Prefab")]
+    [Tooltip("The SpriteElement prefab to be instantiated for each grid cell.")]
+    public SpriteElement m_SpriteElementPrefab;
 
     [Header("Scan Configuration")]
     [Tooltip("Multiplier to determine the resolution of the grid based on the prefab's size.")]
@@ -27,7 +28,7 @@ public class MapMakerEditor : MonoBehaviour
 
     [Header("Painting/Erasing Tools")]
     [Tooltip("Controls whether the tool is in drawing mode (true) or erasing mode (false).")]
-    [ShowIf("HasScanned")] // Only shows if the prefab has been scanned
+    [ShowIf("HasScanned")]
     public bool m_IsDrawingMode = true;
 
     [Tooltip("The size of the brush used for drawing or erasing.")]
@@ -50,12 +51,11 @@ public class MapMakerEditor : MonoBehaviour
         return result;
     }
 
-
     // --- Private Internal State ---
     private int[,] _grid;
     private GameObject _levelRoot;
     private GameObject _spriteHolder;
-    private Dictionary<Vector2Int, SpriteRenderer> _spriteRenderers;
+    private Dictionary<Vector2Int, SpriteElement> _spriteElements;
     private Bounds _currentBounds;
     private float _currentCellSize;
     private int _currentResolution;
@@ -90,6 +90,12 @@ public class MapMakerEditor : MonoBehaviour
             return;
         }
 
+        if (m_SpriteElementPrefab == null)
+        {
+            Debug.LogError("⚠️ Please assign the SpriteElementPrefab field!");
+            return;
+        }
+
         ClearAll();
 
         _levelRoot = new GameObject("Level");
@@ -111,7 +117,7 @@ public class MapMakerEditor : MonoBehaviour
             if (filter.sharedMesh != null)
             {
                 MeshCollider meshCollider = filter.gameObject.AddComponent<MeshCollider>();
-                meshCollider.convex = false; // Important for non-convex meshes
+                meshCollider.convex = false;
             }
         }
 
@@ -129,11 +135,32 @@ public class MapMakerEditor : MonoBehaviour
 
         _currentBounds.Expand(_currentCellSize * 2f);
 
-        _grid = new int[_currentResolution, _currentResolution];
-        _spriteRenderers = new Dictionary<Vector2Int, SpriteRenderer>();
-        Vector3 center = _currentBounds.center;
+        // 🔹 Đảm bảo số lẻ
+        if (_currentResolution % 2 == 0)
+        {
+            // Test 2 cạnh: trái và dưới
+            Vector3 testLeft = new Vector3(_currentBounds.min.x + 0.5f * _currentCellSize, _currentBounds.center.y, _currentBounds.center.z + _currentBounds.size.z);
+            Vector3 testBottom = new Vector3(_currentBounds.center.x, _currentBounds.min.y + 0.5f * _currentCellSize, _currentBounds.center.z + _currentBounds.size.z);
 
-        Sprite squareSprite = GetSquareSprite();
+            bool wallNearLeft = PointInsideMeshByRaycast(testLeft, mapObj);
+            bool wallNearBottom = PointInsideMeshByRaycast(testBottom, mapObj);
+
+            _currentResolution += 1;
+            if (wallNearLeft && !wallNearBottom)
+            {
+                _currentBounds.Expand(new Vector3(_currentCellSize, 0, 0));
+                Debug.Log("📐 Added padding on X axis (left side wall).");
+            }
+            else
+            {
+                _currentBounds.Expand(new Vector3(0, _currentCellSize, 0));
+                Debug.Log("📐 Added padding on Y axis (bottom side wall).");
+            }
+        }
+
+        _grid = new int[_currentResolution, _currentResolution];
+        _spriteElements = new Dictionary<Vector2Int, SpriteElement>();
+        Vector3 center = _currentBounds.center;
 
         for (int x = 0; x < _currentResolution; x++)
         {
@@ -147,35 +174,44 @@ public class MapMakerEditor : MonoBehaviour
 
                 bool inside = PointInsideMeshByRaycast(samplePos, mapObj);
                 _grid[x, y] = inside ? 1 : 0;
-                GameObject cell = new GameObject($"Cell_{x}_{y}");
-                cell.transform.SetParent(_spriteHolder.transform);
+
                 Vector3 spritePosition = new Vector3(
                     _currentBounds.min.x + (x + 0.5f) * _currentCellSize,
                     _currentBounds.min.y + (y + 0.5f) * _currentCellSize,
                     0
                 );
-                cell.transform.position = spritePosition;
 
-                SpriteRenderer sr = cell.AddComponent<SpriteRenderer>();
-                sr.sprite = squareSprite;
+                // Instantiate SpriteElement prefab instead of creating GameObject manually
+                SpriteElement spriteElement = (SpriteElement)PrefabUtility.InstantiatePrefab(m_SpriteElementPrefab);
+                spriteElement.transform.SetParent(_spriteHolder.transform);
+                spriteElement.transform.position = spritePosition;
 
-                BoxCollider2D collider = cell.AddComponent<BoxCollider2D>();
-                collider.size = sr.sprite.bounds.size;
-
-                if (inside)
+                // Scale the SpriteElement to fit the grid cell
+                SpriteRenderer sr = spriteElement.spriteRenderer;
+                if (sr != null && sr.sprite != null)
                 {
-                    sr.color = new Color(0f, 0f, 0f, 0.8f);
-                }
-                else
-                {
-                    sr.color = new Color(1f, 1f, 1f, 0.3f);
+                    float spriteSize = _currentCellSize / sr.sprite.bounds.size.x;
+                    spriteElement.transform.localScale = new Vector3(spriteSize, spriteSize, 1f);
+                    _pixelPerUnit = spriteSize;
                 }
 
-                float spriteSize = _currentCellSize / sr.sprite.bounds.size.x;
-                cell.transform.localScale = new Vector3(spriteSize, spriteSize, 1f);
-                _pixelPerUnit = spriteSize;
+                // Add collider
+                BoxCollider2D collider = spriteElement.gameObject.AddComponent<BoxCollider2D>();
+                if (sr != null && sr.sprite != null)
+                {
+                    collider.size = sr.sprite.bounds.size;
+                }
 
-                _spriteRenderers[new Vector2Int(x, y)] = sr;
+                // Set color based on inside/outside status
+                if (sr != null)
+                {
+                    if (inside)
+                        sr.color = new Color(0f, 0f, 0f, 0.8f);
+                    else
+                        sr.color = new Color(1f, 1f, 1f, 0.3f);
+                }
+
+                _spriteElements[new Vector2Int(x, y)] = spriteElement;
             }
         }
 
@@ -203,11 +239,10 @@ public class MapMakerEditor : MonoBehaviour
             DestroyImmediate(_levelRoot);
 
         _grid = null;
-        _spriteRenderers = null;
+        _spriteElements = null;
         _hasScanned = false;
         Debug.Log("🗑️ All objects cleared!");
     }
-
 
     private void OnSceneGUI(SceneView sceneView)
     {
@@ -248,6 +283,7 @@ public class MapMakerEditor : MonoBehaviour
         y = Mathf.Clamp(y, 0, _currentResolution - 1);
         return new Vector2Int(x, y);
     }
+
     private void DrawAtPosition(Vector2Int centerPos)
     {
         if (colorManager == null)
@@ -267,9 +303,9 @@ public class MapMakerEditor : MonoBehaviour
                     {
                         _grid[x, y] = selectedColorIndex + 2;
                         Vector2Int pos = new Vector2Int(x, y);
-                        if (_spriteRenderers.ContainsKey(pos))
+                        if (_spriteElements.ContainsKey(pos) && _spriteElements[pos].spriteRenderer != null)
                         {
-                            _spriteRenderers[pos].color = colorManager.GetSandColor(selectedColorIndex);
+                            _spriteElements[pos].spriteRenderer.color = colorManager.GetSandColor(selectedColorIndex);
                         }
                     }
                 }
@@ -290,29 +326,14 @@ public class MapMakerEditor : MonoBehaviour
                     {
                         _grid[x, y] = 0; // Reset to empty
                         Vector2Int pos = new Vector2Int(x, y);
-                        if (_spriteRenderers.ContainsKey(pos))
+                        if (_spriteElements.ContainsKey(pos) && _spriteElements[pos].spriteRenderer != null)
                         {
-                            _spriteRenderers[pos].color = new Color(1f, 1f, 1f, 0.3f);
+                            _spriteElements[pos].spriteRenderer.color = new Color(1f, 1f, 1f, 0.3f);
                         }
                     }
                 }
             }
         }
-    }
-
-    private Sprite GetSquareSprite()
-    {
-        Sprite sprite = m_SquareSprite;
-        if (sprite != null) return sprite;
-        return CreateDefaultSprite();
-    }
-
-    private Sprite CreateDefaultSprite()
-    {
-        Texture2D texture = new Texture2D(1, 1);
-        texture.SetPixel(0, 0, Color.white);
-        texture.Apply();
-        return Sprite.Create(texture, new Rect(0, 0, 1, 1), Vector2.one * 0.5f);
     }
 
     private Bounds CalculateMeshBounds(GameObject obj)
@@ -377,10 +398,10 @@ public class MapMakerEditor : MonoBehaviour
 
         if (string.IsNullOrEmpty(path)) return;
 
-        var firstElement = _spriteRenderers.First();
-        var secondElement = _spriteRenderers.Skip(1).First();
-        Vector3 firstPosition = firstElement.Value.gameObject.transform.position;
-        Vector3 secondPosition = secondElement.Value.gameObject.transform.position;
+        var firstElement = _spriteElements.First();
+        var secondElement = _spriteElements.Skip(1).First();
+        Vector3 firstPosition = firstElement.Value.transform.localPosition;
+        Vector3 secondPosition = secondElement.Value.transform.localPosition;
 
         float distance = Vector2.Distance(firstPosition, secondPosition);
 
@@ -395,6 +416,7 @@ public class MapMakerEditor : MonoBehaviour
 
         Debug.Log($"✅ Level saved at: {path}");
     }
+
     [Button("LoadLevel")]
     public void LoadLevel(LevelSO levelData)
     {
@@ -404,59 +426,73 @@ public class MapMakerEditor : MonoBehaviour
             return;
         }
 
+        if (m_SpriteElementPrefab == null)
+        {
+            Debug.LogError("⚠️ Please assign the SpriteElementPrefab field!");
+            return;
+        }
+
         ClearAll();
 
         // --- Restore grid ---
         _grid = levelData.GetMatrix();
         m_MapPrefab = levelData.mapPrefab;
         _currentResolution = _grid.GetLength(0);
-        _spriteRenderers = new Dictionary<Vector2Int, SpriteRenderer>();
+        _spriteElements = new Dictionary<Vector2Int, SpriteElement>();
 
         _levelRoot = new GameObject("Level");
         _spriteHolder = new GameObject("SpriteHolder");
         _spriteHolder.transform.SetParent(_levelRoot.transform);
 
-        Sprite squareSprite = GetSquareSprite();
-
-        _currentCellSize = levelData.distaceBetweenTiles; // ✅ lấy từ SO
-        _pixelPerUnit = levelData.pixelPerUnit;           // ✅ lấy từ SO
+        _currentCellSize = levelData.distaceBetweenTiles;
+        _pixelPerUnit = levelData.pixelPerUnit;
         Vector2 startPos = new Vector2(levelData.startPositionX, levelData.startPositionY);
 
         for (int x = 0; x < _currentResolution; x++)
         {
             for (int y = 0; y < _currentResolution; y++)
             {
-                GameObject cell = new GameObject($"Cell_{x}_{y}");
-                cell.transform.SetParent(_spriteHolder.transform);
-
                 Vector3 spritePosition = new Vector3(
                     startPos.x + (x * _currentCellSize),
                     startPos.y + (y * _currentCellSize),
                     0
                 );
-                cell.transform.position = spritePosition;
 
-                SpriteRenderer sr = cell.AddComponent<SpriteRenderer>();
-                sr.sprite = squareSprite;
+                // Instantiate SpriteElement prefab
+                SpriteElement spriteElement = (SpriteElement)PrefabUtility.InstantiatePrefab(m_SpriteElementPrefab);
+                spriteElement.transform.SetParent(_spriteHolder.transform);
+                spriteElement.transform.localPosition = spritePosition;
 
-                BoxCollider2D collider = cell.AddComponent<BoxCollider2D>();
-                collider.size = sr.sprite.bounds.size;
+                // Scale the SpriteElement
+                SpriteRenderer sr = spriteElement.spriteRenderer;
+                if (sr != null && sr.sprite != null)
+                {
+                    float spriteSize = _currentCellSize / sr.sprite.bounds.size.x;
+                    spriteElement.transform.localScale = new Vector3(spriteSize, spriteSize, 1f);
+                }
 
-                float spriteSize = _currentCellSize / sr.sprite.bounds.size.x;
-                cell.transform.localScale = new Vector3(spriteSize, spriteSize, 1f);
+                // Add collider
+                BoxCollider2D collider = spriteElement.gameObject.AddComponent<BoxCollider2D>();
+                if (sr != null && sr.sprite != null)
+                {
+                    collider.size = sr.sprite.bounds.size;
+                }
 
                 // --- restore màu ---
                 int val = _grid[x, y];
-                if (val == 0)
-                    sr.color = new Color(1f, 1f, 1f, 0.3f);
-                else if (val == 1)
-                    sr.color = new Color(0f, 0f, 0f, 0.8f);
-                else
-                    sr.color = colorManager != null
-                        ? colorManager.GetSandColor(val - 2)
-                        : Color.magenta;
+                if (sr != null)
+                {
+                    if (val == 0)
+                        sr.color = new Color(1f, 1f, 1f, 0.3f);
+                    else if (val == 1)
+                        sr.color = new Color(0f, 0f, 0f, 0.8f);
+                    else
+                        sr.color = colorManager != null
+                            ? colorManager.GetSandColor(val - 2)
+                            : Color.magenta;
+                }
 
-                _spriteRenderers[new Vector2Int(x, y)] = sr;
+                _spriteElements[new Vector2Int(x, y)] = spriteElement;
             }
         }
 

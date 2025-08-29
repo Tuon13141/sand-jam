@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_MapPrefab: {fileID: 5041189297462723462, guid: eba1bafe4dd4a214f803a8a7da4fb67f, type: 3}
-  m_SquareSprite: {fileID: 21300000, guid: 0982a603ea1f37e42b32d30d6c1d8cbc, type: 3}
+  m_SpriteElementPrefab: {fileID: 7190549575130578062, guid: b63ff510ea1dade4e9231860c8c3b42f, type: 3}
   m_ResolutionMultiplier: 50
   colorManager: {fileID: 11400000, guid: 9fe96c5ea808ddf4ea3b57ac38e492e8, type: 2}
   m_IsDrawingMode: 1
